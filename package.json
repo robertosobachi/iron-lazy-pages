@@ -1,0 +1,27 @@
+{
+  "name": "iron-lazy-pages",
+  "version": "1.0.0",
+  "flat": true,
+  "description": "",
+  "main": "iron-lazy-pages.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "git+https://github.com/robertosobachi/iron-lazy-pages.git",
+  "author": "<roberto.sobachi@me.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/robertosobachi/iron-lazy-pages/issues"
+  },
+  "homepage": "https://github.com/robertosobachi/iron-lazy-pages#readme",
+  "dependencies": {
+    "@polymer/iron-selector": "^3.0.0-pre.1",
+    "@polymer/polymer": "^3.0.0-pre.1"
+  },
+  "resolutions": {
+    "@polymer/polymer": "3.0.0-pre.1"
+  }
+}
