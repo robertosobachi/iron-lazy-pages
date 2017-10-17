@@ -47,7 +47,8 @@
 // @demo demo/index.html
 
 import {Element as PolymerElement}
-    from "node_modules/@polymer/polymer/polymer-element.js";
+    import '../polymer/polymer-element.js';
+import IronLazyPagesBehavior from 'iron-lazy-pages-behavior.js';
 
 export default class IronLazyPages extends PolymerElement {
 
