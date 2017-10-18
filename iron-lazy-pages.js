@@ -5,9 +5,6 @@
 // This software may be modified and distributed under the terms
 // of the BSD license.  See the LICENSE file for details.
 
-<link rel="import" href="iron-lazy-pages-behavior.html">
-
-
 // # iron-lazy-pages
 
 // [![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/timvdlippe/iron-lazy-pages)
