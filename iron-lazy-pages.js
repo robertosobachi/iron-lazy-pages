@@ -43,14 +43,12 @@
 // @element iron-lazy-pages
 // @demo demo/index.html
 
-import {Element as PolymerElement}
-    import '../polymer/polymer-element.js';
-import IronLazyPagesBehavior from 'iron-lazy-pages-behavior.js';
+import '../polymer/polymer.js';
+import { Polymer } from '../polymer/lib/legacy/polymer-fn.js';
+import { IronLazyPagesBehavior } from './iron-lazy-pages-behavior.js';
 
-export default class IronLazyPages extends PolymerElement {
-
-  static get template() {
-    return `
+Polymer({
+  _template: `
       <style>
         :host {
           display: block;
@@ -60,8 +58,12 @@ export default class IronLazyPages extends PolymerElement {
         }
       </style>
 
-      <slot></slot>`;
-  }
-}
+      <slot></slot>`,
 
-customElements.define('iron-lazy-pages', IronLazyPages);
+  is: 'iron-lazy-pages',
+
+  behaviors: [
+    IronLazyPagesBehavior
+  ]
+
+});
