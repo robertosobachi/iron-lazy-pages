@@ -5,10 +5,11 @@
 // This software may be modified and distributed under the terms
 // of the BSD license.  See the LICENSE file for details.
 
-import '../polymer/polymer.js';
-import '../iron-selector/iron-selectable.js';
+import { dom } from '../polymer/lib/legacy/polymer.dom.js';
+import { IronSelectableBehavior } from '../iron-selector/iron-selectable.js';
 
-export const IronLazyPagesBehavior = {
+const IronLazyPagesBehaviorImpl = {
+
   properties: {
     // as the selected page is the only one visible, activateEvent
     // is both non-sensical and problematic; e.g. in cases where a user
@@ -59,30 +60,31 @@ export const IronLazyPagesBehavior = {
     }
   },
 
+  listeners: {
+    'iron-deselect': '_itemDeselected',
+    'iron-select': '_itemSelected',
+  },
+
   attached: function() {
-    this.addEventListener('dom-change', function(event) {
+
+    this.addEventListener('dom-change', (event) => {
       // Do not listen to possible sub-selectors if these fired and iron-deselect
       if (event.target.parentNode !== this) {
         return;
       }
-      var target = event.target;
+      const target = event.target;
       if (target['if']) {
-        var sibling = target;
+        let sibling = target;
         while ((sibling = sibling.previousElementSibling) != this.__previousSibling) {
           sibling.classList.add('iron-lazy-selected');
         }
       }
-    }.bind(this));
-  },
-
-  listeners: {
-    'iron-deselect': '_itemDeselected',
-    'iron-select': '_itemSelected'
+    });
   },
 
   _itemDeselected: function(event) {
     // Do not listen to possible sub-selectors if these fired and iron-deselect
-    if (Polymer.dom(event).rootTarget !== this) {
+    if (dom(event).rootTarget !== this) {
       return;
     }
     if (this.hideImmediately) {
@@ -95,45 +97,15 @@ export const IronLazyPagesBehavior = {
 
   _itemSelected: function(event) {
     // Do not listen to possible sub-selectors if these fired and iron-select
-    if (Polymer.dom(event).rootTarget !== this) {
+    if (dom(event).rootTarget !== this) {
       return;
     }
-    var self = this;
-    this._setLoading(true);
-    var page = event.detail.item;
-    var onFinished = function() {
-      self._setLoading(false);
-      if (self.selectedItem === page) {
-        self._show(page);
-      }
-    };
 
-    if (!page.classList.contains('iron-lazy-loaded') && page.dataset.path) {
-      this._loadPage(page, onFinished);
-    } else {
-      onFinished();
-    }
-  },
+    const page = event.detail.item;
 
-  /**
-   * Provide extension point for tests, to make the element actually testable.
-   */
-  _loadPage: function(page, onFinished) {
-    // When not loaded in shadow dom, `this.parentNode.host` is undefined. Resort back to the parentNode
-    var parentHost = this.parentNode;
-    while (parentHost && parentHost.nodeName !== '#document-fragment') {
-      parentHost = parentHost.parentNode;
+    if (this.selectedItem === page) {
+      this._show(page);
     }
-    var url;
-    if (parentHost && parentHost.host &&  parentHost.host.resolveUrl) {
-      url = parentHost.host.resolveUrl(page.dataset.path);
-    } else {
-      url = page.dataset.path;
-    }
-    Polymer.Base.importHref(url, function() {
-      page.classList.add('iron-lazy-loaded');
-      onFinished();
-    }, onFinished);
   },
 
   _show: function(page) {
@@ -147,3 +119,9 @@ export const IronLazyPagesBehavior = {
     this.__previousSibling = page.previousElementSibling;
   }
 };
+
+/** @polymerBehavior */
+export const IronLazyPagesBehavior = [
+  IronSelectableBehavior,
+  IronLazyPagesBehaviorImpl
+];
