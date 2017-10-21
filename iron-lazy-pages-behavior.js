@@ -6,7 +6,9 @@
 // of the BSD license.  See the LICENSE file for details.
 
 import { dom } from '../polymer/lib/legacy/polymer.dom.js';
+import { Polymer } from '../polymer/lib/legacy/polymer-fn.js';
 import { IronSelectableBehavior } from '../iron-selector/iron-selectable.js';
+import { Base } from '../polymer/polymer.js';
 
 const IronLazyPagesBehaviorImpl = {
 
@@ -38,6 +40,14 @@ const IronLazyPagesBehaviorImpl = {
     hideImmediately: {
       type: Boolean,
       value: false
+    },
+
+    /**
+     * The class to set on elements when selected.
+     */
+    selectedClass: {
+      type: String,
+      value: 'iron-lazy-selected'
     },
 
     /**
@@ -73,10 +83,10 @@ const IronLazyPagesBehaviorImpl = {
         return;
       }
       const target = event.target;
-      if (target['if']) {
+      if (target.if) {
         let sibling = target;
         while ((sibling = sibling.previousElementSibling) != this.__previousSibling) {
-          sibling.classList.add('iron-lazy-selected');
+          sibling.classList.add(this.selectedClass);
         }
       }
     });
@@ -88,8 +98,8 @@ const IronLazyPagesBehaviorImpl = {
       return;
     }
     if (this.hideImmediately) {
-      event.detail.item['if'] = false;
-      event.detail.item.classList.remove('iron-lazy-selected');
+      event.detail.item.if = false;
+      event.detail.item.classList.remove(this.selectedClass);
     } else {
       this._lastSelected = event.detail.item;
     }
@@ -101,21 +111,54 @@ const IronLazyPagesBehaviorImpl = {
       return;
     }
 
-    const page = event.detail.item;
+    this._setLoading(true);
+    var page = event.detail.item;
+    var onFinished = () => {
+      this._setLoading(false);
+      if (this.selectedItem === page) {
+        this._show(page);
+      }
+    };
 
-    if (this.selectedItem === page) {
-      this._show(page);
+    if (!page.classList.contains('iron-lazy-loaded') && page.dataset.path) {
+      this._loadPage(page, onFinished);
+    } else {
+      onFinished();
     }
+  },
+
+  /**
+   * Provide extension point for tests, to make the element actually testable.
+   */
+  _loadPage: function(page, onFinished) {
+    // When not loaded in shadow dom, `this.parentNode.host` is undefined. Resort back to the parentNode
+    var parentHost = this.parentNode;
+    while (parentHost && parentHost.nodeName !== '#document-fragment') {
+      parentHost = parentHost.parentNode;
+    }
+    var url;
+    if (parentHost && parentHost.host &&  parentHost.host.resolveUrl) {
+      url = parentHost.host.resolveUrl(page.dataset.path);
+    } else {
+      url = page.dataset.path;
+    }
+
+    url = this.resolveUrl(url);
+
+    import(url).then((module) => {
+      page.classList.add('iron-lazy-loaded');
+      onFinished();
+    });
   },
 
   _show: function(page) {
     if (this._lastSelected) {
-      this._lastSelected['if'] = false;
-      this._lastSelected.classList.remove('iron-lazy-selected');
+      this._lastSelected.if = false;
+      this._lastSelected.classList.remove(this.selectedClass);
     }
 
-    page.classList.add('iron-lazy-selected');
-    page['if'] = true;
+    page.classList.add(this.selectedClass);
+    page.if = true;
     this.__previousSibling = page.previousElementSibling;
   }
 };
