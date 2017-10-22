@@ -43,14 +43,6 @@ const IronLazyPagesBehaviorImpl = {
     },
 
     /**
-     * The class to set on elements when selected.
-     */
-    selectedClass: {
-      type: String,
-      value: 'iron-lazy-selected'
-    },
-
-    /**
      * The set of excluded elements where the key is the `localName`
      * of the element that will be ignored from the item list.
      *
@@ -76,20 +68,24 @@ const IronLazyPagesBehaviorImpl = {
   },
 
   attached: function() {
-
-    this.addEventListener('dom-change', (event) => {
+    this.addEventListener('dom-change', function(event) {
       // Do not listen to possible sub-selectors if these fired and iron-deselect
       if (event.target.parentNode !== this) {
         return;
       }
-      const target = event.target;
-      if (target.if) {
-        let sibling = target;
+      var target = event.target;
+      if (target['if']) {
+        var sibling = target;
         while ((sibling = sibling.previousElementSibling) != this.__previousSibling) {
-          sibling.classList.add(this.selectedClass);
+          sibling.classList.add('iron-lazy-selected');
         }
       }
-    });
+    }.bind(this));
+  },
+
+  listeners: {
+    'iron-deselect': '_itemDeselected',
+    'iron-select': '_itemSelected'
   },
 
   _itemDeselected: function(event) {
@@ -98,8 +94,8 @@ const IronLazyPagesBehaviorImpl = {
       return;
     }
     if (this.hideImmediately) {
-      event.detail.item.if = false;
-      event.detail.item.classList.remove(this.selectedClass);
+      event.detail.item['if'] = false;
+      event.detail.item.classList.remove('iron-lazy-selected');
     } else {
       this._lastSelected = event.detail.item;
     }
@@ -110,13 +106,13 @@ const IronLazyPagesBehaviorImpl = {
     if (dom(event).rootTarget !== this) {
       return;
     }
-
+    var self = this;
     this._setLoading(true);
     var page = event.detail.item;
-    var onFinished = () => {
-      this._setLoading(false);
-      if (this.selectedItem === page) {
-        this._show(page);
+    var onFinished = function() {
+      self._setLoading(false);
+      if (self.selectedItem === page) {
+        self._show(page);
       }
     };
 
@@ -143,8 +139,6 @@ const IronLazyPagesBehaviorImpl = {
       url = page.dataset.path;
     }
 
-    url = this.resolveUrl(url);
-
     import(url).then((module) => {
       page.classList.add('iron-lazy-loaded');
       onFinished();
@@ -153,12 +147,12 @@ const IronLazyPagesBehaviorImpl = {
 
   _show: function(page) {
     if (this._lastSelected) {
-      this._lastSelected.if = false;
-      this._lastSelected.classList.remove(this.selectedClass);
+      this._lastSelected['if'] = false;
+      this._lastSelected.classList.remove('iron-lazy-selected');
     }
 
-    page.classList.add(this.selectedClass);
-    page.if = true;
+    page.classList.add('iron-lazy-selected');
+    page['if'] = true;
     this.__previousSibling = page.previousElementSibling;
   }
 };
